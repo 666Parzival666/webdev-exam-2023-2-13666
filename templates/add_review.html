@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Написать рецензию - Библиотека{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>Написать рецензию</h2>
+  <form method="POST">
+    <div class="form-group">
+      <label for="rating">Оценка</label>
+      <select class="form-control" id="rating" name="rating">
+        <option value="5">Отлично</option>
+        <option value="4">Хорошо</option>
+        <option value="3">Удовлетворительно</option>
+        <option value="2">Неудовлетворительно</option>
+        <option value="1">Плохо</option>
+        <option value="0">Ужасно</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="review_text">Текст рецензии</label>
+      <textarea class="form-control" id="review_text" name="review_text" rows="5"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+  </form>
+</div>
+{% endblock %}
