@@ -3,29 +3,33 @@
 {% block content %}
     <h1>Главная страница</h1>
 
-    <!-- Форма для создания нового жанра -->
-    <form method="POST" action="{{ url_for('home') }}">
-        <label for="name">Название жанра:</label>
-        <input type="text" name="name" id="name" required>
-        <button type="submit">Создать</button>
-    </form>
-
-    <!-- Отображение списка жанров -->
-    <h2>Список жанров:</h2>
-    <ul>
-        {% for genre in genres %}
-        <li>{{ genre.name }}</li>
+    <!-- Отображение списка книг -->
+    <h2>Список книг:</h2>
+    <div class="book-list">
+        {% for book in books %}
+            <div class="book">
+                <img src="{{ url_for('static', filename='covers/' + book.cover.filename) }}" alt="Обложка">
+                <h3>{{ book.title }}</h3>
+                <p>Жанры: {% for genre in book.genres %}{{ genre.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+                <p>Год: {{ book.year }}</p>
+                <p>Средняя оценка: {{ book.average_rating }}</p>
+                <p>Количество рецензий: {{ book.reviews_count }}</p>
+            </div>
+            {% if loop.index % 4 == 0 %}
+                <div class="clearfix"></div>
+            {% endif %}
         {% endfor %}
-    </ul>
+    </div>
 
     <!-- Отображение flash-сообщений -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <ul class="flash-messages">
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
+            <ul class="flash-messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
         {% endif %}
     {% endwith %}
+
 {% endblock %}

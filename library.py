@@ -1,95 +1,91 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-from flask_mysqldb import MySQL
-import hashlib
+from flask import Blueprint, render_template, request, redirect, flash
+from models import db, Book, Cover, Genre
+from werkzeug.utils import secure_filename
 import os
-import markdown
-import bleach
+import hashlib
+from bleach import clean
+from config import UPLOAD_FOLDER
 
-library_bp = Blueprint('library', __name__)
+bp = Blueprint('library', __name__)
 
-# ...
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
-@library_bp.route('/books/<int:book_id>', methods=['GET'])
-def view_book(book_id):
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-        '''
-        SELECT books.id, books.title, books.author, books.description, covers.hash
-        FROM books
-        JOIN covers ON books.cover_id = covers.id
-        WHERE books.id = %s
-        ''',
-        (book_id,)
-    )
-    book_data = cursor.fetchone()
-    cursor.close()
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    if not book_data:
-        flash('Книга не найдена', 'error')
-        return redirect(url_for('library.book_list'))
+@bp.route('/')
+def index():
+    books = Book.query.all()
+    genres = Genre.query.all()
+    return render_template('index.html', books=books, genres=genres)
 
-    book = {
-        'id': book_data[0],
-        'title': book_data[1],
-        'author': book_data[2],
-        'description': book_data[3],
-        'cover_hash': book_data[4],
-    }
 
-    # Преобразование описания книги из Markdown в HTML
-    book['description'] = markdown.markdown(book['description'], extensions=['markdown.extensions.nl2br'])
-
-    # Получение рецензий на книгу
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-        '''
-        SELECT reviews.rating, reviews.review_text, users.username
-        FROM reviews
-        JOIN users ON reviews.user_id = users.id
-        WHERE reviews.book_id = %s
-        ''',
-        (book_id,)
-    )
-    reviews = cursor.fetchall()
-    cursor.close()
-
-    return render_template('view_book.html', book=book, reviews=reviews)
-
-@library_bp.route('/books/<int:book_id>/reviews/add', methods=['GET', 'POST'])
-def add_review(book_id):
+@bp.route('/add_book', methods=['GET', 'POST'])
+def add_book():
     if request.method == 'POST':
-        rating = int(request.form['rating'])
-        review_text = request.form['review_text']
+        title = request.form['title']
+        description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
+        year = int(request.form['year'])
+        publisher = request.form['publisher']
+        author = request.form['author']
+        pages = int(request.form['pages'])
+        genres = request.form.getlist('genres')
 
-        # Проверка наличия рецензии от текущего пользователя для данной книги
-        cursor = mysql.connection.cursor()
-        cursor.execute(
-            '''
-            SELECT id
-            FROM reviews
-            WHERE book_id = %s AND user_id = %s
-            ''',
-            (book_id, current_user.id)
+        if 'cover' not in request.files:
+            flash('Необходимо загрузить обложку книги', 'error')
+            return redirect(request.referrer)
+
+        cover_file = request.files['cover']
+        if cover_file.filename == '':
+            flash('Необходимо выбрать файл обложки', 'error')
+            return redirect(request.referrer)
+
+        if not allowed_file(cover_file.filename):
+            flash('Недопустимый тип файла. Разрешены только изображения форматов JPG, JPEG и PNG.', 'error')
+            return redirect(request.referrer)
+
+        filename = secure_filename(cover_file.filename)
+        cover_path = os.path.join(UPLOAD_FOLDER, filename)
+        cover_md5 = hashlib.md5(cover_file.read()).hexdigest()
+
+        # Проверяем, существует ли уже обложка с таким хэшем
+        existing_cover = Cover.query.filter_by(md5_hash=cover_md5).first()
+        if existing_cover:
+            cover_id = existing_cover.id
+        else:
+            # Сохраняем файл обложки
+            cover_file.seek(0)
+            cover_file.save(cover_path)
+
+            # Создаем запись об обложке в базе данных
+            new_cover = Cover(filename=filename, mime_type=cover_file.mimetype, md5_hash=cover_md5)
+            db.session.add(new_cover)
+            db.session.commit()
+            cover_id = new_cover.id
+
+        # Создаем запись о книге в базе данных
+        new_book = Book(
+            title=title,
+            description=description,
+            year=year,
+            publisher=publisher,
+            author=author,
+            pages=pages,
+            cover_id=cover_id
         )
-        existing_review = cursor.fetchone()
 
-        if existing_review:
-            flash('Вы уже оставили рецензию на данную книгу', 'error')
-            cursor.close()
-            return redirect(url_for('library.view_book', book_id=book_id))
+        for genre_id in genres:
+            genre = Genre.query.get(genre_id)
+            if genre:
+                new_book.genres.append(genre)
 
-        # Сохранение рецензии
-        cursor.execute(
-            '''
-            INSERT INTO reviews (rating, review_text, book_id, user_id)
-            VALUES (%s, %s, %s, %s)
-            ''',
-            (rating, review_text, book_id, current_user.id)
-        )
-        mysql.connection.commit()
-        cursor.close()
+        db.session.add(new_book)
+        db.session.commit()
 
-        flash('Рецензия успешно добавлена', 'success')
-        return redirect(url_for('library.view_book', book_id=book_id))
-    else:
-        return render_template('add_review.html', book_id=book_id)
+        flash('Книга успешно добавлена', 'success')
+        return redirect('/add_book')  # Редирект на страницу добавления книги после успешного добавления
+
+    # Если метод GET, отображаем форму добавления книги
+    genres = Genre.query.all()
+    return render_template('add_book.html', genres=genres)

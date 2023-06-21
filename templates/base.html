@@ -14,8 +14,12 @@
         </div>
         <div class="navigation">
             {% if current_user.is_authenticated and current_user.role_id == 1 %}
-                    <!-- Ссылка на создание книги только для администратора -->
-                    <li><a href="#">Создать книгу</a></li>
+                <!-- Ссылка на создание книги только для администратора -->
+                <li><a href="{{ url_for('library.add_book') }}">Создать книгу</a></li>
+            {% endif %}
+            {% if not request.path == '/' %}
+                <!-- Ссылка для возврата на главную страницу -->
+                <li><a href="{{ url_for('library.index') }}">На главную</a></li>
             {% endif %}
         </div>
         <div class="user">

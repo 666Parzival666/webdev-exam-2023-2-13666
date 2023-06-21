@@ -38,3 +38,23 @@ nav {
 .nav-links ul:nth-child(2) {
   margin-left: auto;
 }
+
+.book-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.book {
+    width: 20%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.book img {
+    width: 200px;
+    height: 300px;
+}
+
+.clearfix {
+    clear: both;
+}

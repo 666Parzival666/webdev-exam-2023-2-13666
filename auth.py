@@ -6,6 +6,7 @@ from models import User
 
 bp = Blueprint('auth', __name__)
 
+
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -24,12 +25,13 @@ def login():
 
         login_user(user, remember=remember)
         next_page = request.args.get('next')
-        return redirect(next_page or url_for('home'))
+        return redirect(next_page or url_for('library.index'))
 
     return render_template('auth/auth.html')
+
 
 @bp.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('home'))
+    return redirect(url_for('library.index'))
