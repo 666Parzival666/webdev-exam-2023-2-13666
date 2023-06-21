@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
@@ -11,11 +12,21 @@ class Book(db.Model):
     publisher = db.Column(db.String(255), nullable=False)
     author = db.Column(db.String(255), nullable=False)
     pages = db.Column(db.Integer, nullable=False)
-    cover_id = db.Column(db.Integer, db.ForeignKey('cover.id'), nullable=False)
-    cover = db.relationship('Cover', backref=db.backref('book', uselist=False))
+    cover_id = db.Column(db.Integer, db.ForeignKey('cover.id', ondelete='CASCADE'), nullable=False)
+    cover = db.relationship('Cover', backref=db.backref('book', uselist=False, cascade='all, delete'))
 
-    # Соединительная таблица для связи книг и жанров
-    genres = db.relationship('Genre', secondary='book_genre', backref=db.backref('books', lazy=True))
+    genres = db.relationship('Genre', secondary='book_genre', backref=db.backref('books', lazy=True, cascade='all, delete'))
+
+# Таблица жанров
+class Genre(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+
+# Соединительная таблица для связи книг и жанров
+book_genre = db.Table('book_genre',
+    db.Column('book_id', db.Integer, db.ForeignKey('book.id', ondelete='CASCADE'), primary_key=True),
+    db.Column('genre_id', db.Integer, db.ForeignKey('genre.id', ondelete='CASCADE'), primary_key=True)
+)
 
 # Таблица обложек
 class Cover(db.Model):
@@ -27,21 +38,34 @@ class Cover(db.Model):
 # Таблица рецензий
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     text = db.Column(db.Text, nullable=False)
-    date_added = db.Column(db.TIMESTAMP, nullable=False, default=db.func.current_timestamp())
+    date_added = db.Column(db.TIMESTAMP, nullable=False, server_default=db.func.current_timestamp())
 
 # Таблица пользователей
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     login = db.Column(db.String(255), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(255), nullable=False)
     middle_name = db.Column(db.String(255))
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
 
 # Таблица ролей пользователей
 class Role(db.Model):

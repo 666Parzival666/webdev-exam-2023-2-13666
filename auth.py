@@ -1,59 +1,35 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask import Blueprint, render_template, redirect, request, url_for, flash
+from flask_login import current_user, login_user, logout_user, login_required
+from werkzeug.security import check_password_hash
+
 from models import User
-from functools import wraps
 
-auth_bp = Blueprint('auth', __name__)
+bp = Blueprint('auth', __name__)
 
-
-def init_login_manager(app):
-    login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
-    login_manager.login_message = 'Для доступа к данной странице необходимо пройти процедуру аутентификации.'
-    login_manager.login_message_category = 'warning'
-    login_manager.user_loader(load_user)
-    login_manager.init_app(app)
-
-
-def load_user(user_id):
-    user = User.query.get(user_id)
-    return user
-
-
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@bp.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
     if request.method == 'POST':
         login = request.form.get('login')
         password = request.form.get('password')
-        if login and password:
-            user = User.query.filter_by(login=login).first()
-            if user and user.check_password(password):
-                login_user(user)
-                flash('Вы успешно аутентифицированы.', 'success')
-                next = request.args.get('next')
-                return redirect(next or url_for('index'))
-        flash('Невозможно аутентифицироваться с указанными логином и паролем', 'danger')
-    return render_template('auth/login.html')
+        remember = bool(request.form.get('remember'))
 
+        user = User.query.filter_by(login=login).first()
 
-def permission_check(action):
-    def decor(function):
-        @wraps(function)
-        def wrapper(*args, **kwargs):
-            user_id = kwargs.get('user_id')
-            user = None
-            if user_id:
-                user = load_user(user_id)
-            if not current_user.can(action, user):
-                flash('Недостаточно прав', 'warning')
-                return redirect(url_for('index'))
-            return function(*args, **kwargs)
-        return wrapper
-    return decor
+        if user is None or not check_password_hash(user.password_hash, password):
+            flash('Невозможно аутентифицироваться с указанными логином и паролем')
+            return redirect(url_for('auth.login'))
 
+        login_user(user, remember=remember)
+        next_page = request.args.get('next')
+        return redirect(next_page or url_for('home'))
 
-@auth_bp.route('/logout')
+    return render_template('auth/auth.html')
+
+@bp.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('home'))

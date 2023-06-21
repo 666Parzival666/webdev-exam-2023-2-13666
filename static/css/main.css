@@ -1,0 +1,40 @@
+nav {
+  background-color: #f0f0f0;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  /* Стили для области логотипа */
+}
+
+.nav-links ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+}
+
+.nav-links ul li {
+  margin-right: 10px;
+}
+
+.nav-links ul li a {
+  text-decoration: none;
+  color: #333;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-info .user-name {
+  margin-right: 10px;
+}
+
+.nav-links ul:nth-child(2) {
+  margin-left: auto;
+}

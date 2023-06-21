@@ -2,17 +2,32 @@
 <html>
 <head>
     <title>My Flask App</title>
-    <!-- Ваши стили и скрипты -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- Ваши другие стили и скрипты -->
 </head>
 <body>
     <nav>
         <!-- Верхняя горизонтальная полоса навигации -->
-        <ul>
-            <!-- Кнопки или текстовые ссылки для перехода по разделам -->
-            <li><a href="/">Главная</a></li>
-            <!-- Остальные разделы навигации -->
-        </ul>
-
+        <div class="logo">
+            <!-- Область для логотипа -->
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип">
+        </div>
+        <div class="navigation">
+            {% if current_user.is_authenticated and current_user.role_id == 1 %}
+                    <!-- Ссылка на создание книги только для администратора -->
+                    <li><a href="#">Создать книгу</a></li>
+            {% endif %}
+        </div>
+        <div class="user">
+            {% if current_user.is_authenticated %}
+                <!-- ФИО пользователя и кнопка выхода -->
+                <span>{{ current_user.last_name }} {{ current_user.first_name }} {{ current_user.middle_name }}</span>
+                <a href="{{ url_for('auth.logout') }}">Выйти</a>
+            {% else %}
+                <!-- Кнопка входа -->
+                <a href="{{ url_for('auth.login') }}">Войти</a>
+            {% endif %}
+        </div>
     </nav>
 
     <!-- Контент страницы -->
