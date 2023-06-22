@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, flash
-from models import db, Book, Cover, Genre
+from flask import Blueprint, render_template, request, redirect, flash, url_for
+from models import db, Book, Cover, Genre, Review
 from werkzeug.utils import secure_filename
+from flask_login import current_user
 import os
 import hashlib
 from bleach import clean
@@ -10,15 +11,48 @@ bp = Blueprint('library', __name__)
 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @bp.route('/')
 def index():
     books = Book.query.all()
     genres = Genre.query.all()
+
+    for book in books:
+        reviews = Review.query.filter_by(book_id=book.id).all()
+        ratings = [review.rating for review in reviews]
+        average_rating = sum(ratings) / len(ratings) if ratings else 0
+        reviews_count = len(reviews)
+        book.average_rating = average_rating
+        book.reviews_count = reviews_count
+
     return render_template('index.html', books=books, genres=genres)
+
+
+@bp.route('/book/<int:book_id>')
+def view_book(book_id):
+    book = Book.query.get(book_id)
+    reviews = Review.query.filter_by(book_id=book.id).all()
+    ratings = [review.rating for review in reviews]
+    average_rating = sum(ratings) / len(ratings) if ratings else 0
+    reviews_count = len(reviews)
+    book.average_rating = average_rating
+    book.reviews_count = reviews_count
+
+    user_review = None
+    if current_user.is_authenticated:
+        user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
+
+    # Если пользователь авторизован и оставил рецензию, перемещаем его рецензию в начало списка
+    if user_review:
+        reviews.remove(user_review)
+        reviews.insert(0, user_review)
+
+    return render_template('book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
 
 
 @bp.route('/add_book', methods=['GET', 'POST'])
@@ -89,3 +123,72 @@ def add_book():
     # Если метод GET, отображаем форму добавления книги
     genres = Genre.query.all()
     return render_template('add_book.html', genres=genres)
+
+
+@bp.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    book = Book.query.get(book_id)
+    genres = Genre.query.all()
+
+    if request.method == 'POST':
+        # Получите все данные из формы редактирования книги
+        title = request.form['title']
+        description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
+        year = int(request.form['year'])
+        publisher = request.form['publisher']
+        author = request.form['author']
+        pages = int(request.form['pages'])
+        genres = request.form.getlist('genres')
+
+        # Обновите данные книги в базе данных
+        book.title = title
+        book.description = description
+        book.year = year
+        book.publisher = publisher
+        book.author = author
+        book.pages = pages
+        book.genres.clear()  # Очистите текущие жанры книги
+
+        for genre_id in genres:
+            genre = Genre.query.get(genre_id)
+            if genre:
+                book.genres.append(genre)  # Добавьте новые жанры книги
+
+        db.session.commit()
+
+        flash('Данные книги успешно обновлены', 'success')
+        return redirect(url_for('library.view_book', book_id=book.id))
+
+    return render_template('edit_book.html', book=book, genres=genres)
+
+
+@bp.route('/delete_book/<int:book_id>', methods=['POST'])
+def delete_book(book_id):
+    book = Book.query.get(book_id)
+
+    if book:
+        try:
+            cover_id = book.cover_id  # Получаем ID обложки книги
+            db.session.delete(book)  # Удаляем запись о книге из базы данных
+            db.session.commit()
+
+            if cover_id:
+                # Проверяем, есть ли другие книги с этой обложкой
+                other_books_with_cover = Book.query.filter_by(cover_id=cover_id).count()
+                if other_books_with_cover == 0:
+                    # Если нет других книг с этой обложкой, удаляем файл обложки
+                    cover = Cover.query.get(cover_id)
+                    if cover:
+                        cover_path = os.path.join(UPLOAD_FOLDER, cover.filename)
+                        os.remove(cover_path)
+                        db.session.delete(cover)
+                        db.session.commit()
+
+            flash('Книга успешно удалена.', 'success')
+        except Exception as e:
+            flash('Произошла ошибка при удалении книги.', 'error')
+            bp.logger.error(f'Ошибка удаления книги с ID {book_id}: {str(e)}')
+    else:
+        flash('Книга не найдена.', 'error')
+
+    return redirect(url_for('library.index'))

@@ -58,3 +58,58 @@ nav {
 .clearfix {
     clear: both;
 }
+
+.book-image {
+    display: flex;
+    align-items: center;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.btn-small {
+    display: block;
+    margin-bottom: 5px;
+    padding: 3px 6px;
+    background-color: #ccc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.btn-small:hover {
+    background-color: #aaa;
+}
+
+.book-details {
+    margin-top: 10px;
+}
+
+#deleteModal {
+  display: none; /* Скрыто по умолчанию */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Прозрачный фон */
+  z-index: 9999; /* Выше других элементов */
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.modal-buttons button {
+  margin-left: 10px;
+}

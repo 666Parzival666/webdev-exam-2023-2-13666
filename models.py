@@ -17,10 +17,12 @@ class Book(db.Model):
 
     genres = db.relationship('Genre', secondary='book_genre', backref=db.backref('books', lazy=True, cascade='all, delete'))
 
+
 # Таблица жанров
 class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
+
 
 # Соединительная таблица для связи книг и жанров
 book_genre = db.Table('book_genre',
@@ -28,12 +30,14 @@ book_genre = db.Table('book_genre',
     db.Column('genre_id', db.Integer, db.ForeignKey('genre.id', ondelete='CASCADE'), primary_key=True)
 )
 
+
 # Таблица обложек
 class Cover(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
     mime_type = db.Column(db.String(255), nullable=False)
     md5_hash = db.Column(db.String(255), nullable=False)
+
 
 # Таблица рецензий
 class Review(db.Model):

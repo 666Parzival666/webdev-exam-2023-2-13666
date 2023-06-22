@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <!-- Добавление модального окна -->
     <h1>Главная страница</h1>
 
     <!-- Отображение списка книг -->
@@ -8,18 +9,47 @@
     <div class="book-list">
         {% for book in books %}
             <div class="book">
-                <img src="{{ url_for('static', filename='covers/' + book.cover.filename) }}" alt="Обложка">
-                <h3>{{ book.title }}</h3>
-                <p>Жанры: {% for genre in book.genres %}{{ genre.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
-                <p>Год: {{ book.year }}</p>
-                <p>Средняя оценка: {{ book.average_rating }}</p>
-                <p>Количество рецензий: {{ book.reviews_count }}</p>
+                <div class="book-image">
+                    <img src="{{ url_for('static', filename='covers/' + book.cover.filename) }}" alt="Обложка">
+                    <div class="buttons">
+                        <a href="{{ url_for('library.view_book', book_id=book.id) }}" class="btn-small">Посмотреть</a>
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.role_id == 1 %}
+                                <a href="{{ url_for('library.edit_book', book_id=book.id) }}" class="btn-small">Редактировать</a>
+                                <button onclick="deleteBookModal({{ book.id }})" class="btn-small">Удалить</button>
+                            {% elif current_user.role_id == 2 %}
+                                <a href="{{ url_for('library.edit_book', book_id=book.id) }}" class="btn-small">Редактировать</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="book-details">
+                    <h3>{{ book.title }}</h3>
+                    <p>Жанры: {% for genre in book.genres %}{{ genre.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+                    <p>Год: {{ book.year }}</p>
+                    <p>Средняя оценка: {{ book.average_rating }}</p>
+                    <p>Количество рецензий: {{ book.reviews_count }}</p>
+                </div>
             </div>
             {% if loop.index % 4 == 0 %}
                 <div class="clearfix"></div>
             {% endif %}
         {% endfor %}
     </div>
+
+    <!-- Модальное окно для подтверждения удаления книги -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2>Удаление книги</h2>
+            <p>Вы уверены, что хотите удалить эту книгу?</p>
+            <div class="modal-buttons">
+                <button id="deleteYesBtn" class="btn btn-danger">Да</button>
+                <button id="deleteNoBtn" class="btn btn-secondary">Нет</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts/delete_book.js') }}"></script>
 
     <!-- Отображение flash-сообщений -->
     {% with messages = get_flashed_messages() %}

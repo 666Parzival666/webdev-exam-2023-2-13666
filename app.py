@@ -3,6 +3,7 @@ from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECR
 from models import db, Book, Cover, Review, User, Role, Genre
 from auth import bp as auth_bp
 from library import bp as library_bp
+from reviews import bp as reviews_bp
 from flask_login import LoginManager, current_user
 
 
@@ -26,6 +27,7 @@ login_manager.init_app(app)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(library_bp)
+app.register_blueprint(reviews_bp)
 
 
 @login_manager.user_loader
