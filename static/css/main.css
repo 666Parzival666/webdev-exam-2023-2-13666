@@ -113,3 +113,20 @@ nav {
 .modal-buttons button {
   margin-left: 10px;
 }
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: right;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-right: 20px;
+  background-color: #f0f0f0;
+}
+
+.content {
+  min-height: calc(100vh - 70px);
+  padding-bottom: 50px;
+}

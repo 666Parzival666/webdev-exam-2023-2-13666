@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, flash
+from flask import Blueprint, render_template, request, redirect, flash, url_for
 from models import db, Book, Cover, Genre, Review
 from flask_login import current_user, login_required
 from bleach import clean
@@ -12,6 +12,10 @@ bp = Blueprint('reviews', __name__)
 def add_review(book_id):
     book = Book.query.get(book_id)
     existing_review = Review.query.filter_by(book_id=book_id, user_id=current_user.id).first()
+
+    if not current_user.is_authenticated:
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        return redirect(url_for('auth.login'))
 
     if existing_review:
         # Если пользователь уже написал рецензию на данную книгу,

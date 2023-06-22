@@ -37,6 +37,32 @@
         {% endfor %}
     </div>
 
+    <!-- Пагинация -->
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('library.index', page=pagination.prev_num) }}">Previous</a>
+        {% endif %}
+        {% for num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if num %}
+                {% if num != pagination.page %}
+                    <a href="{{ url_for('library.index', page=num) }}">{{ num }}</a>
+                {% else %}
+                    <span class="current-page">{{ num }}</span>
+                {% endif %}
+            {% else %}
+                <span class="ellipsis">...</span>
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+            <a href="{{ url_for('library.index', page=pagination.next_num) }}">Next</a>
+        {% endif %}
+    </div>
+    {% if current_user.is_authenticated and current_user.role_id == 1 %}
+        <div>
+            <a href="{{ url_for('library.add_book') }}">Добавить книгу</a>
+        </div>
+    {% endif %}
+
     <!-- Модальное окно для подтверждения удаления книги -->
     <div id="deleteModal" class="modal">
         <div class="modal-content">

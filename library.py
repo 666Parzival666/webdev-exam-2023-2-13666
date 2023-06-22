@@ -19,7 +19,12 @@ def allowed_file(filename):
 
 @bp.route('/')
 def index():
-    books = Book.query.all()
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    books_pagination = Book.query.order_by(Book.year.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    books = books_pagination.items
+
     genres = Genre.query.all()
 
     for book in books:
@@ -30,7 +35,7 @@ def index():
         book.average_rating = average_rating
         book.reviews_count = reviews_count
 
-    return render_template('index.html', books=books, genres=genres)
+    return render_template('index.html', books=books, genres=genres, pagination=books_pagination)
 
 
 @bp.route('/book/<int:book_id>')
@@ -57,6 +62,13 @@ def view_book(book_id):
 
 @bp.route('/add_book', methods=['GET', 'POST'])
 def add_book():
+    if not current_user.is_authenticated:
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        return redirect(url_for('auth.login'))
+
+    if current_user.role_id != 1:  # Assuming admin role ID is 1
+        flash("У вас недостаточно прав для выполнения данного действия")
+        return redirect(url_for('library.index'))
     if request.method == 'POST':
         title = request.form['title']
         description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
@@ -122,13 +134,21 @@ def add_book():
 
     # Если метод GET, отображаем форму добавления книги
     genres = Genre.query.all()
-    return render_template('add_book.html', genres=genres)
+    return render_template('add_book.html', genres=genres, add_mode=True)
 
 
 @bp.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
 def edit_book(book_id):
     book = Book.query.get(book_id)
     genres = Genre.query.all()
+
+    if not current_user.is_authenticated:
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        return redirect(url_for('auth.login'))
+
+    if current_user.role_id > 2:
+        flash("У вас недостаточно прав для выполнения данного действия")
+        return redirect(url_for('library.index'))
 
     if request.method == 'POST':
         # Получите все данные из формы редактирования книги
@@ -165,6 +185,14 @@ def edit_book(book_id):
 @bp.route('/delete_book/<int:book_id>', methods=['POST'])
 def delete_book(book_id):
     book = Book.query.get(book_id)
+
+    if not current_user.is_authenticated:
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        return redirect(url_for('auth.login'))
+
+    if current_user.role_id != 1:
+        flash("У вас недостаточно прав для выполнения данного действия")
+        return redirect(url_for('library.index'))
 
     if book:
         try:

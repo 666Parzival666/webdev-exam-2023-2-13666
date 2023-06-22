@@ -13,9 +13,9 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип">
         </div>
         <div class="navigation">
-            {% if current_user.is_authenticated and current_user.role_id == 1 %}
+            {% if current_user.is_authenticated and current_user.role_id == 2 %}
                 <!-- Ссылка на создание книги только для администратора -->
-                <li><a href="{{ url_for('library.add_book') }}">Создать книгу</a></li>
+                <li><a href="#">Модерация рецензий</a></li>
             {% endif %}
             {% if not request.path == '/' %}
                 <!-- Ссылка для возврата на главную страницу -->
@@ -39,6 +39,22 @@
         {% block content %}{% endblock %}
     </div>
 
+    <!-- Футер -->
+    <div class="footer">
+        Непомнящих Игорь. 2-13666. 2023
+    </div>
+
     <!-- Ваши скрипты -->
+
+    <!-- Отображение flash-сообщений -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 </body>
 </html>
