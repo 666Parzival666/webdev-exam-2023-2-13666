@@ -1,8 +1,8 @@
 import os
 
-SECRET_KEY = '8cTTmvi0K}0eYq}C'
+SECRET_KEY = 'your_secret_key'
 
-SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://666Parzival666:Robsalvatore13@666Parzival666.mysql.pythonanywhere-services.com/666Parzival666$grearLibrary'
+SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://sql10627580:5cIXjyr3VL@sql10.freesqldatabase.com/sql10627580'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = True
 
