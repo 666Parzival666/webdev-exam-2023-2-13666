@@ -52,7 +52,7 @@ def my_reviews():
 @login_required
 def moderate_reviews():
     # Получаем номер текущей страницы и количество элементов на странице из запроса
-    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
+    # page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
 
     # Запрашиваем только рецензии со статусом 1, сортируем их по дате добавления в обратном порядке
     reviews = Review.query.filter_by(status_id=1).order_by(Review.date_added.desc()).limit(per_page).offset(offset).all()
