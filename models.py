@@ -39,6 +39,12 @@ class Cover(db.Model):
     md5_hash = db.Column(db.String(255), nullable=False)
 
 
+# Таблица статусов рецензий
+class ReviewStatus(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+
+
 # Таблица рецензий
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,6 +53,9 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     text = db.Column(db.Text, nullable=False)
     date_added = db.Column(db.TIMESTAMP, nullable=False, server_default=db.func.current_timestamp())
+
+    status_id = db.Column(db.Integer, db.ForeignKey('review_status.id'))
+    status = db.relationship('ReviewStatus', backref=db.backref('reviews', lazy=True))
 
 # Таблица пользователей
 class User(UserMixin, db.Model):

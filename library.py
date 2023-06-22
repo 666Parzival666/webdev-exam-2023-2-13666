@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
-from models import db, Book, Cover, Genre, Review
+from models import db, Book, Cover, Genre, Review, User
 from werkzeug.utils import secure_filename
 from flask_login import current_user
 import os
 import hashlib
 from bleach import clean
 from config import UPLOAD_FOLDER
+from sqlalchemy.exc import SQLAlchemyError
 
 bp = Blueprint('library', __name__)
 
@@ -28,7 +29,7 @@ def index():
     genres = Genre.query.all()
 
     for book in books:
-        reviews = Review.query.filter_by(book_id=book.id).all()
+        reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
         ratings = [review.rating for review in reviews]
         average_rating = sum(ratings) / len(ratings) if ratings else 0
         reviews_count = len(reviews)
@@ -41,21 +42,25 @@ def index():
 @bp.route('/book/<int:book_id>')
 def view_book(book_id):
     book = Book.query.get(book_id)
-    reviews = Review.query.filter_by(book_id=book.id).all()
+    reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
     ratings = [review.rating for review in reviews]
     average_rating = sum(ratings) / len(ratings) if ratings else 0
     reviews_count = len(reviews)
     book.average_rating = average_rating
     book.reviews_count = reviews_count
 
+    for review in reviews:
+        user = User.query.get(review.user_id)
+        review.user_name = f"{user.first_name} {user.last_name}"
+
     user_review = None
     if current_user.is_authenticated:
         user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
 
     # Если пользователь авторизован и оставил рецензию, перемещаем его рецензию в начало списка
-    if user_review:
-        reviews.remove(user_review)
-        reviews.insert(0, user_review)
+    # if user_review:
+    #     reviews.remove(user_review)
+    #     reviews.insert(0, user_review)
 
     return render_template('book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
 
@@ -69,68 +74,85 @@ def add_book():
     if current_user.role_id != 1:  # Assuming admin role ID is 1
         flash("У вас недостаточно прав для выполнения данного действия")
         return redirect(url_for('library.index'))
+
     if request.method == 'POST':
-        title = request.form['title']
-        description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
-        year = int(request.form['year'])
-        publisher = request.form['publisher']
-        author = request.form['author']
-        pages = int(request.form['pages'])
-        genres = request.form.getlist('genres')
+        try:
+            title = request.form['title']
+            description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
+            year = int(request.form['year'])
+            publisher = request.form['publisher']
+            author = request.form['author']
+            pages = int(request.form['pages'])
+            genres = request.form.getlist('genres')
 
-        if 'cover' not in request.files:
-            flash('Необходимо загрузить обложку книги', 'error')
-            return redirect(request.referrer)
+            if 'cover' not in request.files:
+                flash('Необходимо загрузить обложку книги', 'error')
+                return redirect(request.referrer)
 
-        cover_file = request.files['cover']
-        if cover_file.filename == '':
-            flash('Необходимо выбрать файл обложки', 'error')
-            return redirect(request.referrer)
+            cover_file = request.files['cover']
+            if cover_file.filename == '':
+                flash('Необходимо выбрать файл обложки', 'error')
+                return redirect(request.referrer)
 
-        if not allowed_file(cover_file.filename):
-            flash('Недопустимый тип файла. Разрешены только изображения форматов JPG, JPEG и PNG.', 'error')
-            return redirect(request.referrer)
+            if not allowed_file(cover_file.filename):
+                flash('Недопустимый тип файла. Разрешены только изображения форматов JPG, JPEG и PNG.', 'error')
+                return redirect(request.referrer)
 
-        filename = secure_filename(cover_file.filename)
-        cover_path = os.path.join(UPLOAD_FOLDER, filename)
-        cover_md5 = hashlib.md5(cover_file.read()).hexdigest()
+            filename = secure_filename(cover_file.filename)
+            cover_path = os.path.join(UPLOAD_FOLDER, filename)
+            cover_md5 = hashlib.md5(cover_file.read()).hexdigest()
 
-        # Проверяем, существует ли уже обложка с таким хэшем
-        existing_cover = Cover.query.filter_by(md5_hash=cover_md5).first()
-        if existing_cover:
-            cover_id = existing_cover.id
-        else:
-            # Сохраняем файл обложки
-            cover_file.seek(0)
-            cover_file.save(cover_path)
+            # Проверяем, существует ли уже обложка с таким хэшем
+            existing_cover = Cover.query.filter_by(md5_hash=cover_md5).first()
+            if existing_cover:
+                cover_id = existing_cover.id
+                ext = os.path.splitext(filename)[-1]
+                filename = f"{cover_id}{ext}"
+            else:
+                # Сохраняем файл обложки
+                cover_file.seek(0)
+                cover_file.save(cover_path)
 
-            # Создаем запись об обложке в базе данных
-            new_cover = Cover(filename=filename, mime_type=cover_file.mimetype, md5_hash=cover_md5)
-            db.session.add(new_cover)
+                # Получаем новый идентификатор для обложки
+                cover_id = Cover.query.order_by(Cover.id.desc()).first().id + 1
+                ext = os.path.splitext(filename)[-1]
+                filename = f"{cover_id}{ext}"
+
+                # Создаем запись об обложке в базе данных
+                new_cover = Cover(id=cover_id, filename=filename, mime_type=cover_file.mimetype, md5_hash=cover_md5)
+                db.session.add(new_cover)
+                db.session.commit()
+
+            # Переименовываем файл
+            new_cover_path = os.path.join(UPLOAD_FOLDER, filename)
+            os.rename(cover_path, new_cover_path)
+
+            # Создаем запись о книге в базе данных
+            new_book = Book(
+                title=title,
+                description=description,
+                year=year,
+                publisher=publisher,
+                author=author,
+                pages=pages,
+                cover_id=cover_id
+            )
+
+            for genre_id in genres:
+                genre = Genre.query.get(genre_id)
+                if genre:
+                    new_book.genres.append(genre)
+
+            db.session.add(new_book)
             db.session.commit()
-            cover_id = new_cover.id
 
-        # Создаем запись о книге в базе данных
-        new_book = Book(
-            title=title,
-            description=description,
-            year=year,
-            publisher=publisher,
-            author=author,
-            pages=pages,
-            cover_id=cover_id
-        )
+            flash('Книга успешно добавлена', 'success')
+            return redirect(url_for('library.view_book', book_id=new_book.id))
 
-        for genre_id in genres:
-            genre = Genre.query.get(genre_id)
-            if genre:
-                new_book.genres.append(genre)
-
-        db.session.add(new_book)
-        db.session.commit()
-
-        flash('Книга успешно добавлена', 'success')
-        return redirect('/add_book')  # Редирект на страницу добавления книги после успешного добавления
+        except Exception as e:
+            db.session.rollback()  # Откатываем изменения в базе данных
+            flash('При сохранении данных возникла ошибка. Проверьте корректность введённых данных.', 'error')
+            return render_template('add_book.html', genres=Genre.query.all(), add_mode=True)
 
     # Если метод GET, отображаем форму добавления книги
     genres = Genre.query.all()
@@ -151,33 +173,39 @@ def edit_book(book_id):
         return redirect(url_for('library.index'))
 
     if request.method == 'POST':
-        # Получите все данные из формы редактирования книги
-        title = request.form['title']
-        description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
-        year = int(request.form['year'])
-        publisher = request.form['publisher']
-        author = request.form['author']
-        pages = int(request.form['pages'])
-        genres = request.form.getlist('genres')
+        try:
+            # Получите все данные из формы редактирования книги
+            title = request.form['title']
+            description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
+            year = int(request.form['year'])
+            publisher = request.form['publisher']
+            author = request.form['author']
+            pages = int(request.form['pages'])
+            genres = request.form.getlist('genres')
 
-        # Обновите данные книги в базе данных
-        book.title = title
-        book.description = description
-        book.year = year
-        book.publisher = publisher
-        book.author = author
-        book.pages = pages
-        book.genres.clear()  # Очистите текущие жанры книги
+            # Обновите данные книги в базе данных
+            book.title = title
+            book.description = description
+            book.year = year
+            book.publisher = publisher
+            book.author = author
+            book.pages = pages
+            book.genres.clear()  # Очистите текущие жанры книги
 
-        for genre_id in genres:
-            genre = Genre.query.get(genre_id)
-            if genre:
-                book.genres.append(genre)  # Добавьте новые жанры книги
+            for genre_id in genres:
+                genre = Genre.query.get(genre_id)
+                if genre:
+                    book.genres.append(genre)  # Добавьте новые жанры книги
 
-        db.session.commit()
+            db.session.commit()
 
-        flash('Данные книги успешно обновлены', 'success')
-        return redirect(url_for('library.view_book', book_id=book.id))
+            flash('Данные книги успешно обновлены', 'success')
+            return redirect(url_for('library.view_book', book_id=book.id))
+
+        except SQLAlchemyError:
+            db.session.rollback()  # Откатываем изменения в базе данных
+            flash('При сохранении данных возникла ошибка. Проверьте корректность введённых данных.', 'error')
+            return render_template('edit_book.html', book=book, genres=genres)
 
     return render_template('edit_book.html', book=book, genres=genres)
 

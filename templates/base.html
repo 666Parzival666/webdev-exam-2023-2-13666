@@ -13,9 +13,13 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип">
         </div>
         <div class="navigation">
-            {% if current_user.is_authenticated and current_user.role_id == 2 %}
-                <!-- Ссылка на создание книги только для администратора -->
-                <li><a href="#">Модерация рецензий</a></li>
+            {% if current_user.is_authenticated and current_user.role_id != 3 %}
+                <!-- Ссылка на модерацию рецензий -->
+                <li><a href="{{ url_for('reviews.moderate_reviews') }}">Модерация рецензий</a></li>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+                <!-- Ссылка на рецензии пользователя -->
+                <li><a href="{{ url_for('reviews.my_reviews') }}">Мои рецензии</a></li>
             {% endif %}
             {% if not request.path == '/' %}
                 <!-- Ссылка для возврата на главную страницу -->

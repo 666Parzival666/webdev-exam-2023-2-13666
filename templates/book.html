@@ -33,6 +33,7 @@
             {% for review in reviews %}
                 {% if review != user_review %}
                     <li>
+                        <p>Пользователь: {{ review.user_name }}</p>
                         <p>Оценка: {{ review.rating }}</p>
                         <p>{{ review.text }}</p>
                     </li>

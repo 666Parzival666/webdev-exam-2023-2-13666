@@ -130,3 +130,10 @@ nav {
   min-height: calc(100vh - 70px);
   padding-bottom: 50px;
 }
+
+.editor-toolbar.fullscreen,
+.editor-toolbar-side.fullscreen,
+.editor-toolbar a.fullscreen,
+.editor-statusbar.fullscreen {
+    z-index: 1050 !important;
+}
