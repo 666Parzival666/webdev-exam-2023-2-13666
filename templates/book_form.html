@@ -5,7 +5,17 @@
         <input type="text" name="title" id="title" value="{{ book.title if book else '' }}" required><br>
 
         <label for="description">Описание:</label>
-        <textarea name="description" id="description" required>{{ book.description if book else '' }}</textarea><br>
+        <textarea name="description" id="description">{{ book.description if book else '' }}</textarea><br>
+        <script>
+            const easyMDE = new EasyMDE({
+                element: document.getElementById('description'),
+                lineWrapping: true,
+                previewRender: function (plainText) {
+                    // Просто возвращаем исходный текст без преобразования в теги
+                    return plainText;
+                }
+            });
+        </script>
 
         <label for="year">Год издания:</label>
         <input type="number" name="year" id="year" value="{{ book.year if book else '' }}" min="1700" max="{{ current_year }}" required><br>

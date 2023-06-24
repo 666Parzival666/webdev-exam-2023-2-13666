@@ -14,7 +14,7 @@
         <td>{{ review.status.name }}</td>
 ````````<td>{{ review.book_title }}</td>
         <td>{{ review.rating }}</td>
-        <td>{{ review.text }}</td>
+        <td>{{ review.text | safe }}</td>
       </tr>
     {% endfor %}
   </table>

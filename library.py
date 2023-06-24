@@ -7,6 +7,7 @@ import hashlib
 from bleach import clean
 from config import UPLOAD_FOLDER
 from sqlalchemy.exc import SQLAlchemyError
+import markdown2
 
 bp = Blueprint('library', __name__)
 
@@ -52,15 +53,21 @@ def view_book(book_id):
     for review in reviews:
         user = User.query.get(review.user_id)
         review.user_name = f"{user.first_name} {user.last_name}"
+        review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
     user_review = None
     if current_user.is_authenticated:
         user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
+        if user_review:
+            user_review.text = markdown2.markdown(user_review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
     # Если пользователь авторизован и оставил рецензию, перемещаем его рецензию в начало списка
-    # if user_review:
-    #     reviews.remove(user_review)
-    #     reviews.insert(0, user_review)
+    if user_review and user_review in reviews:
+        reviews.remove(user_review)
+        reviews.insert(0, user_review)
+
+    # Преобразование описания книги из Markdown в HTML
+    book.description = markdown2.markdown(book.description, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
     return render_template('book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
 
@@ -98,34 +105,33 @@ def add_book():
                 flash('Недопустимый тип файла. Разрешены только изображения форматов JPG, JPEG и PNG.', 'error')
                 return redirect(request.referrer)
 
-            filename = secure_filename(cover_file.filename)
-            cover_path = os.path.join(UPLOAD_FOLDER, filename)
             cover_md5 = hashlib.md5(cover_file.read()).hexdigest()
 
             # Проверяем, существует ли уже обложка с таким хэшем
             existing_cover = Cover.query.filter_by(md5_hash=cover_md5).first()
             if existing_cover:
                 cover_id = existing_cover.id
-                ext = os.path.splitext(filename)[-1]
-                filename = f"{cover_id}{ext}"
+                filename = existing_cover.filename
             else:
                 # Сохраняем файл обложки
+                filename = secure_filename(cover_file.filename)
+                cover_path = os.path.join(UPLOAD_FOLDER, filename)
                 cover_file.seek(0)
                 cover_file.save(cover_path)
 
                 # Получаем новый идентификатор для обложки
                 cover_id = Cover.query.order_by(Cover.id.desc()).first().id + 1
-                ext = os.path.splitext(filename)[-1]
-                filename = f"{cover_id}{ext}"
+
+                # Переименовываем файл
+                new_filename = f"{cover_id}{os.path.splitext(filename)[-1]}"
+                new_cover_path = os.path.join(UPLOAD_FOLDER, new_filename)
+                os.rename(cover_path, new_cover_path)
+                filename = new_filename
 
                 # Создаем запись об обложке в базе данных
                 new_cover = Cover(id=cover_id, filename=filename, mime_type=cover_file.mimetype, md5_hash=cover_md5)
                 db.session.add(new_cover)
                 db.session.commit()
-
-            # Переименовываем файл
-            new_cover_path = os.path.join(UPLOAD_FOLDER, filename)
-            os.rename(cover_path, new_cover_path)
 
             # Создаем запись о книге в базе данных
             new_book = Book(

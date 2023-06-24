@@ -17,7 +17,17 @@
         </div>
         <div class="form-group">
             <label for="comment">Текст рецензии:</label>
-            <textarea name="comment" id="comment" class="form-control" rows="5"></textarea>
+            <textarea name="comment" id="comment" class="form-control" rows="5"></textarea><br>
+            <script>
+                const easyMDE = new EasyMDE({
+                    element: document.getElementById('comment'),
+                    lineWrapping: true,
+                    previewRender: function (plainText) {
+                        // Просто возвращаем исходный текст без преобразования в теги
+                        return plainText;
+                    }
+                });
+            </script>
         </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>

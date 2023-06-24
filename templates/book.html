@@ -10,7 +10,7 @@
         <p>Издатель: {{ book.publisher }}</p>
         <p>Год: {{ book.year }}</p>
         <p>Количество страниц: {{ book.pages }}</p>
-        <p>Описание: {{ book.description }}</p>
+        <p>Описание: {{ book.description | safe }}</p>
         <p>Жанры: {% for genre in book.genres %}{{ genre.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
         <p>Средняя оценка: {{ book.average_rating }}</p>
         <p>Количество рецензий: {{ book.reviews_count }}</p>
@@ -27,7 +27,7 @@
                 <li>
                     <h3>Ваша рецензия</h3>
                     <p>Оценка: {{ user_review.rating }}</p>
-                    <p>{{ user_review.text }}</p>
+                    <p>{{ user_review.text | safe }}</p>
                 </li>
             {% endif %}
             {% for review in reviews %}
@@ -35,7 +35,7 @@
                     <li>
                         <p>Пользователь: {{ review.user_name }}</p>
                         <p>Оценка: {{ review.rating }}</p>
-                        <p>{{ review.text }}</p>
+                        <p>{{ review.text | safe }}</p>
                     </li>
                 {% endif %}
             {% endfor %}
