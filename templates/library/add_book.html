@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% block book_content %}
+      <!-- Форма добавления книги -->
+      <form method="POST" action="{{ url_for('library.add_book') }}" enctype="multipart/form-data">
+        {% include 'library/book_form.html' %}
+      </form>
+    {% endblock %}
+{% endblock %}

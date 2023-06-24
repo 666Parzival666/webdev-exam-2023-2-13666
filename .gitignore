@@ -1,0 +1,5 @@
+# created by virtualenv automatically
+*
+/static/covers/*
+
+config.py

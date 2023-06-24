@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Модерация рецензий</h1>
+  {% for review in reviews %}
+    <div class="review">
+      <h3>{{ review.book_title }}</h3>
+      <p>Автор рецензии: {{ review.first_name }}</p>
+      <p>Дата добавления: {{ review.added_date }}</p>
+      <p><a href="{{ url_for('reviews.review', review_id=review.id) }}">Рассмотреть</a></p>
+    </div>
+  {% endfor %}
+
+  <div class="pagination">
+    {{ pagination.info }}
+    {{ pagination.links }}
+  </div>
+{% endblock %}
