@@ -37,7 +37,7 @@ def index():
         book.average_rating = average_rating
         book.reviews_count = reviews_count
 
-    return render_template('index.html', books=books, genres=genres, pagination=books_pagination)
+    return render_template('library/index.html', books=books, genres=genres, pagination=books_pagination)
 
 
 @bp.route('/book/<int:book_id>')
@@ -69,7 +69,7 @@ def view_book(book_id):
     # Преобразование описания книги из Markdown в HTML
     book.description = markdown2.markdown(book.description, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
-    return render_template('book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
+    return render_template('library/book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
 
 
 @bp.route('/add_book', methods=['GET', 'POST'])
@@ -162,7 +162,7 @@ def add_book():
 
     # Если метод GET, отображаем форму добавления книги
     genres = Genre.query.all()
-    return render_template('add_book.html', genres=genres, add_mode=True)
+    return render_template('library/add_book.html', genres=genres, add_mode=True)
 
 
 @bp.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
@@ -213,7 +213,7 @@ def edit_book(book_id):
             flash('При сохранении данных возникла ошибка. Проверьте корректность введённых данных.', 'error')
             return render_template('edit_book.html', book=book, genres=genres)
 
-    return render_template('edit_book.html', book=book, genres=genres)
+    return render_template('library/edit_book.html', book=book, genres=genres)
 
 
 @bp.route('/delete_book/<int:book_id>', methods=['POST'])

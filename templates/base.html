@@ -12,31 +12,31 @@
         <!-- Верхняя горизонтальная полоса навигации -->
         <div class="logo">
             <!-- Область для логотипа -->
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип">
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Логотип">
         </div>
         <div class="navigation">
-            {% if current_user.is_authenticated and current_user.role_id != 3 %}
-                <!-- Ссылка на модерацию рецензий -->
-                <li><a href="{{ url_for('reviews.moderate_reviews') }}">Модерация рецензий</a></li>
+            {% if not request.path == '/' %}
+                <!-- Ссылка для возврата на главную страницу -->
+                <a href="{{ url_for('library.index') }}" class="navlink">На главную</a>
             {% endif %}
             {% if current_user.is_authenticated %}
                 <!-- Ссылка на рецензии пользователя -->
-                <li><a href="{{ url_for('reviews.my_reviews') }}">Мои рецензии</a></li>
+                <a href="{{ url_for('reviews.my_reviews') }}" class="navlink">Мои рецензии</a>
             {% endif %}
-            {% if not request.path == '/' %}
-                <!-- Ссылка для возврата на главную страницу -->
-                <li><a href="{{ url_for('library.index') }}">На главную</a></li>
+            {% if current_user.is_authenticated and current_user.role_id != 3 %}
+                <!-- Ссылка на модерацию рецензий -->
+                <a href="{{ url_for('reviews.moderate_reviews') }}" class="navlink">Модерация рецензий</a>
             {% endif %}
         </div>
         <div class="user">
-            {% if current_user.is_authenticated %}
-                <!-- ФИО пользователя и кнопка выхода -->
-                <span>{{ current_user.last_name }} {{ current_user.first_name }} {{ current_user.middle_name }}</span>
-                <a href="{{ url_for('auth.logout') }}">Выйти</a>
-            {% else %}
-                <!-- Кнопка входа -->
-                <a href="{{ url_for('auth.login') }}">Войти</a>
-            {% endif %}
+          {% if current_user.is_authenticated %}
+            <!-- ФИО пользователя и кнопка выхода -->
+            <span class="user-name">&#128100; {{ current_user.last_name }} {{ current_user.first_name }} {{ current_user.middle_name }}</span>
+            <a class="logout-button" href="{{ url_for('auth.logout') }}">Выйти</a>
+          {% else %}
+            <!-- Кнопка входа -->
+            <a class="login-button" href="{{ url_for('auth.login') }}">Войти</a>
+          {% endif %}
         </div>
     </nav>
 
@@ -47,7 +47,7 @@
 
     <!-- Футер -->
     <div class="footer">
-        Непомнящих Игорь. 2-13666. 2023
+        <span class="user-name">Непомнящих Игорь. 2-13666. 2023</span>
     </div>
 
     <!-- Ваши скрипты -->

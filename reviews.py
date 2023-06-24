@@ -35,7 +35,7 @@ def add_review(book_id):
         flash('Рецензия успешно добавлена', 'success')
         return redirect(f'/book/{book_id}')
 
-    return render_template('add_review.html', book=book)
+    return render_template('reviews/add_review.html', book=book)
 
 @bp.route('/my_reviews')
 @login_required
@@ -51,7 +51,7 @@ def my_reviews():
         review.book_author = book.author
         review.book_cover = book.cover.filename
         review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
-    return render_template('my_reviews.html', reviews=reviews)
+    return render_template('reviews/my_reviews.html', reviews=reviews)
 
 
 @bp.route('/moderate')
@@ -83,7 +83,7 @@ def moderate_reviews():
     # Создаем объект Pagination
     pagination = Pagination(page=page, per_page=per_page, total=total_reviews, css_framework='bootstrap4')
 
-    return render_template('moderate.html', reviews=reviews, pagination=pagination)
+    return render_template('reviews/moderate.html', reviews=reviews, pagination=pagination)
 
 
 @bp.route('/review/<int:review_id>', methods=['GET', 'POST'])
@@ -113,4 +113,4 @@ def review(review_id):
             flash('Рецензия отклонена', 'success')
         return redirect(url_for('reviews.moderate_reviews'))
 
-    return render_template('review.html', review=review, user=user, book=book)
+    return render_template('reviews/review.html', review=review, user=user, book=book)

@@ -1,42 +1,92 @@
+body {
+  margin: 0px;
+  font-family: "Arial", sans-serif;
+}
+
 nav {
-  background-color: #f0f0f0;
-  padding: 10px;
+  background-color: #213c3f;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .logo {
-  /* Стили для области логотипа */
+  max-width: 80px;
 }
 
-.nav-links ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.logo img {
+  width: 80px;
+  height: 80px;
+}
+
+.navigation {
   display: flex;
+  flex-direction: row;
 }
 
-.nav-links ul li {
-  margin-right: 10px;
-}
-
-.nav-links ul li a {
-  text-decoration: none;
-  color: #333;
-}
-
-.user-info {
-  display: flex;
+.navlink {
+  margin-right: 20px;
   align-items: center;
+  background: 0 0;
+  border: 0;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  height: 100%;
+  justify-content: flex-start;
+  outline: 0;
+  padding: 12px 0;
+  text-decoration: none;
+  transition: color .2s linear,background-color .2s linear;
+  z-index: 992;
+  text-transform: uppercase;
+  font-family: "Arial", sans-serif;
+  font-size: 16px;
 }
 
-.user-info .user-name {
-  margin-right: 10px;
+.navlink:hover {
+  color: #d5b774;
 }
 
-.nav-links ul:nth-child(2) {
-  margin-left: auto;
+.user {
+  margin-right: 20px;
+}
+
+.user-name {
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  font-family: "Arial", sans-serif;
+  margin-right: 15px;
+  cursor: default;
+}
+
+.login-button,
+.logout-button {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: #d5b774;
+  color: #111c20;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s linear;
+  font-weight: bold;
+  font-family: "Arial", sans-serif;
+}
+
+.login-button:hover,
+.logout-button:hover {
+  background-color: #CCCCCC;
+}
+
+.library{
+  display: flex;
+  flex-direction: column;
+  margin-left: 10%;
+  width: 80%;
 }
 
 .book-list {
@@ -45,47 +95,111 @@ nav {
 }
 
 .book {
-    width: 20%;
-    padding: 10px;
-    box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  width: 20%;
+  flex-direction: column;
+  margin-bottom: 20px;
 }
 
-.book img {
-    width: 200px;
-    height: 300px;
+.book-image {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.cover {
+  width: 80%
+}
+
+.book-image img {
+  width: 100%;
+  aspect-ratio: 2/3;
+}
+
+.buttons {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.book-details {
+  flex-grow: 1;
+}
+
+.btn-small, .btn-small-del {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #EFEFEF;
+  color: #333333;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  transition: background-color 0.2s linear;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  text-align: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+.btn-small:hover {
+  background-color: #213c3f;
+  color: white;
+}
+
+.btn-small-del:hover{
+  background-color: #f5a6a6;
+  color: white;
+}
+
+.book-details {
+  width: 90%;
+  cursor: default;
+}
+
+.book-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.short-info {
+  font-size: 14px;
+}
+
+.book-details p {
+  margin-bottom: 4px;
+  border-bottom: 1px solid #213c3f;
+}
+
+.rating {
+  font-size: 18px;
+}
+
+.low-rating {
+    color: #fc2819;
+}
+
+.medium-rating {
+    color: #eb7821;
+}
+
+.high-rating {
+    color: #95f090;
+}
+
+.super-rating {
+    color: #038514;
 }
 
 .clearfix {
     clear: both;
-}
-
-.book-image {
-    display: flex;
-    align-items: center;
-}
-
-.buttons {
-    display: flex;
-    flex-direction: column;
-    margin-left: 10px;
-}
-
-.btn-small {
-    display: block;
-    margin-bottom: 5px;
-    padding: 3px 6px;
-    background-color: #ccc;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 4px;
-}
-
-.btn-small:hover {
-    background-color: #aaa;
-}
-
-.book-details {
-    margin-top: 10px;
 }
 
 #deleteModal {
@@ -123,7 +237,11 @@ nav {
   padding-top: 10px;
   padding-bottom: 10px;
   padding-right: 20px;
-  background-color: #f0f0f0;
+  background-color: #213c3f;
+  color: #96969a;
+  font-weight: bold;
+  font-size: 18px;
+  font-family: "Arial", sans-serif;
 }
 
 .content {
@@ -136,4 +254,42 @@ nav {
 .editor-toolbar a.fullscreen,
 .editor-statusbar.fullscreen {
     z-index: 1050 !important;
+}
+
+.pagination {
+    text-align: center;
+}
+
+.pagination-link {
+    margin: 0 5px;
+    color: #000;
+    text-decoration: none;
+}
+
+.current-page {
+    margin: 0 5px;
+    font-weight: bold;
+}
+
+.add-book {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.add-book-button {
+  padding: 8px 12px;
+  background-color: #d5b774;
+  color: #111c20;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s linear;
+  font-weight: bold;
+}
+
+.add-book-button:hover {
+  background-color: #CCCCCC;
 }
