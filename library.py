@@ -43,7 +43,7 @@ def index():
 @bp.route('/book/<int:book_id>')
 def view_book(book_id):
     book = Book.query.get(book_id)
-    reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
+    reviews = Review.query.filter((Review.book_id == book.id) & ((Review.status_id == 2) | (Review.user_id == current_user.id))).all()
     ratings = [review.rating for review in reviews]
     average_rating = sum(ratings) / len(ratings) if ratings else 0
     reviews_count = len(reviews)
