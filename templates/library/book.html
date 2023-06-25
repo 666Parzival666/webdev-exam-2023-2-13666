@@ -28,12 +28,12 @@
 
         <div class="book-reviews">
             {% if current_user.is_authenticated and current_user.role_id in [1, 2, 3] %}
-                {% if not user_review %}
+                {% if not reviews and not user_review %}
                     <a href="{{ url_for('reviews.add_review', book_id=book.id) }}" class="add-review-button">Написать рецензию</a>
                 {% endif %}
             {% endif %}
 
-            {% if reviews %}
+            {% if reviews or user_review %}
                 <h2>Рецензии</h2>
                 <div class="reviews-list">
                     {% if user_review %}
@@ -54,7 +54,10 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <p>Пока нет рецензий.</p>
+                <h2>Рецензии</h2>
+                <div class="reviews-list">
+                    <p>Пока нет рецензий.</p>
+                </div>
             {% endif %}
         </div>
     </div>
