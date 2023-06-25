@@ -25,7 +25,8 @@ def index():
     page = request.args.get('page', 1, type=int)
     per_page = 10
 
-    books_pagination = Book.query.order_by(Book.year.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    books_pagination = Book.query.order_by(Book.year.desc(), Book.title) \
+        .paginate(page=page, per_page=per_page, error_out=False)
     books = books_pagination.items
 
     genres = Genre.query.all()
