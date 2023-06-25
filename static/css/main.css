@@ -622,6 +622,7 @@ input[type="file"] {
 
 .review {
   display: flex;
+  max-width: 18%;
   flex-direction: column;
   justify-content: space-between;
   margin-bottom: 10px;

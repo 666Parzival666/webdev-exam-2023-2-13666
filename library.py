@@ -20,7 +20,6 @@ def allowed_file(filename):
 
 
 @bp.route('/')
-@bp.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
     per_page = 10
