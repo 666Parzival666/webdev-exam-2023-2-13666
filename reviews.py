@@ -16,7 +16,7 @@ def add_review(book_id):
     existing_review = Review.query.filter_by(book_id=book_id, user_id=current_user.id).first()
 
     if not current_user.is_authenticated:
-        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации", 'error')
         return redirect(url_for('auth.login'))
 
     if existing_review:
@@ -41,7 +41,7 @@ def add_review(book_id):
 @login_required
 def my_reviews():
     if not current_user.is_authenticated:
-        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации", 'error')
         return redirect(url_for('auth.login'))
 
     reviews = Review.query.filter_by(user_id=current_user.id).all()
@@ -58,14 +58,14 @@ def my_reviews():
 @login_required
 def moderate_reviews():
     if not current_user.is_authenticated:
-        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации", 'error')
         return redirect(url_for('auth.login'))
 
     if current_user.role_id > 2:
-        flash("У вас недостаточно прав для выполнения данного действия")
+        flash("У вас недостаточно прав для выполнения данного действия", 'error')
         return redirect(url_for('library.index'))
     # Получаем номер текущей страницы и количество элементов на странице из запроса
-    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
+    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page', default=1)
 
     # Запрашиваем только рецензии со статусом 1, сортируем их по дате добавления в обратном порядке
     reviews = Review.query.filter_by(status_id=1).order_by(Review.date_added.desc()).limit(per_page).offset(offset).all()
@@ -90,11 +90,11 @@ def moderate_reviews():
 @login_required
 def review(review_id):
     if not current_user.is_authenticated:
-        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации", 'error')
         return redirect(url_for('auth.login'))
 
     if current_user.role_id > 2:
-        flash("У вас недостаточно прав для выполнения данного действия")
+        flash("У вас недостаточно прав для выполнения данного действия", 'error')
         return redirect(url_for('library.index'))
     review = Review.query.get(review_id)
     review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])

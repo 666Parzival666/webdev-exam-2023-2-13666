@@ -5,7 +5,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-    <!-- Ваши другие стили и скрипты -->
 </head>
 <body>
     <nav>
@@ -40,16 +39,22 @@
         </div>
     </nav>
     <!-- Отображение flash-сообщений -->
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for message in messages %}
-                    <span class="{% if message.startswith('Отрицательное') %}negative{% else %}positive{% endif %}">
-                        {{ message }}
-                    </span>
-                {% endfor %}
-            </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        {% if category == 'success' %}
+          <div class="flash-messages">
+            <span class="success">{{ message }}</span>
+          </div>
+        {% elif category == 'error' %}
+          <div class="flash-messages">
+            <span class="error">{{ message }}</span>
+          </div>
+        {% else %}
+          <div class="flash-messages">
+            <span>{{ message }}</span>
+          </div>
         {% endif %}
+      {% endfor %}
     {% endwith %}
     <!-- Контент страницы -->
     <div class="content">

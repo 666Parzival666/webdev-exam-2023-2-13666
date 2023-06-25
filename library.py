@@ -75,11 +75,11 @@ def view_book(book_id):
 @bp.route('/add_book', methods=['GET', 'POST'])
 def add_book():
     if not current_user.is_authenticated:
-        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации", 'error')
         return redirect(url_for('auth.login'))
 
     if current_user.role_id != 1:  # Assuming admin role ID is 1
-        flash("У вас недостаточно прав для выполнения данного действия")
+        flash("У вас недостаточно прав для выполнения данного действия", 'error')
         return redirect(url_for('library.index'))
 
     if request.method == 'POST':
@@ -171,16 +171,16 @@ def edit_book(book_id):
     genres = Genre.query.all()
 
     if not current_user.is_authenticated:
-        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации", 'error')
         return redirect(url_for('auth.login'))
 
     if current_user.role_id > 2:
-        flash("У вас недостаточно прав для выполнения данного действия")
+        flash("У вас недостаточно прав для выполнения данного действия", 'error')
         return redirect(url_for('library.index'))
 
     if request.method == 'POST':
         try:
-            # Получите все данные из формы редактирования книги
+            # Получаем все данные из формы редактирования книги
             title = request.form['title']
             description = clean(request.form['description'], tags=[], attributes={}, protocols=[], strip=True)
             year = int(request.form['year'])
@@ -189,19 +189,19 @@ def edit_book(book_id):
             pages = int(request.form['pages'])
             genres = request.form.getlist('genres')
 
-            # Обновите данные книги в базе данных
+            # Обновляем данные книги в базе данных
             book.title = title
             book.description = description
             book.year = year
             book.publisher = publisher
             book.author = author
             book.pages = pages
-            book.genres.clear()  # Очистите текущие жанры книги
+            book.genres.clear()  # Очищаем текущие жанры книги
 
             for genre_id in genres:
                 genre = Genre.query.get(genre_id)
                 if genre:
-                    book.genres.append(genre)  # Добавьте новые жанры книги
+                    book.genres.append(genre)  # Добавляем новые жанры книги
 
             db.session.commit()
 
@@ -221,11 +221,11 @@ def delete_book(book_id):
     book = Book.query.get(book_id)
 
     if not current_user.is_authenticated:
-        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации")
+        flash("Для выполнения данного действия необходимо пройти процедуру аутентификации", 'error')
         return redirect(url_for('auth.login'))
 
     if current_user.role_id != 1:
-        flash("У вас недостаточно прав для выполнения данного действия")
+        flash("У вас недостаточно прав для выполнения данного действия", 'error')
         return redirect(url_for('library.index'))
 
     if book:
