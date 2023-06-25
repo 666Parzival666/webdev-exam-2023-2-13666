@@ -20,6 +20,7 @@ def allowed_file(filename):
 
 
 @bp.route('/')
+@bp.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -37,15 +38,35 @@ def index():
         book.average_rating = average_rating
         book.reviews_count = reviews_count
 
-    return render_template('library/index.html', books=books, genres=genres, pagination=books_pagination)
+    user_review = None
+    if current_user.is_authenticated:
+        user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
+
+    return render_template('library/index.html', books=books, genres=genres, pagination=books_pagination, user_review=user_review)
 
 
 @bp.route('/book/<int:book_id>')
 def view_book(book_id):
     book = Book.query.get(book_id)
-    reviews = Review.query.filter((Review.book_id == book.id) & ((Review.status_id == 2) | (Review.user_id == current_user.id))).all()
+    reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
+
+    if current_user.is_authenticated:
+        user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
+        if user_review:
+            user_review.text = markdown2.markdown(user_review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
+            # Если пользователь авторизован и оставил рецензию, перемещаем его рецензию в начало списка
+            if user_review in reviews:
+                reviews.remove(user_review)
+                reviews.insert(0, user_review)
+        else:
+            user_review = None
+    else:
+        user_review = None
+
     ratings = [review.rating for review in reviews]
-    average_rating = sum(ratings) / len(ratings) if ratings else 0
+    if user_review and user_review.status_id == 2:
+        reviews.append(user_review)
+    average_rating = round(sum(ratings) / len(ratings), 2) if ratings else 0
     reviews_count = len(reviews)
     book.average_rating = average_rating
     book.reviews_count = reviews_count
@@ -55,18 +76,6 @@ def view_book(book_id):
         review.user_name = f"{user.first_name} {user.last_name}"
         review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
-    user_review = None
-    if current_user.is_authenticated:
-        user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
-        if user_review:
-            user_review.text = markdown2.markdown(user_review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
-
-    # Если пользователь авторизован и оставил рецензию, перемещаем его рецензию в начало списка
-    if user_review and user_review in reviews:
-        reviews.remove(user_review)
-        reviews.insert(0, user_review)
-
-    # Преобразование описания книги из Markdown в HTML
     book.description = markdown2.markdown(book.description, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
     return render_template('library/book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
