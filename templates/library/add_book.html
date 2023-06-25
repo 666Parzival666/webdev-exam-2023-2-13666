@@ -2,9 +2,20 @@
 
 {% block content %}
     {% block book_content %}
-      <!-- Форма добавления книги -->
-      <form method="POST" action="{{ url_for('library.add_book') }}" enctype="multipart/form-data">
-        {% include 'library/book_form.html' %}
-      </form>
+        <div class="form-page">
+          <!-- Форма добавления книги -->
+          <form method="POST" action="{{ url_for('library.add_book') }}" enctype="multipart/form-data">
+            {% include 'library/book_form.html' %}
+          </form>
+        </div>
     {% endblock %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 {% endblock %}

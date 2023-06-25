@@ -2,18 +2,20 @@
 
 {% block content %}
     {% block book_content %}
-        <!-- Форма редактирования книги -->
-        <form method="POST" action="{{ url_for('library.edit_book', book_id=book.id) }}" enctype="multipart/form-data">
-          {% include 'library/book_form.html' %}
-        </form>
+        <div class="form-page">
+            <!-- Форма редактирования книги -->
+            <form method="POST" action="{{ url_for('library.edit_book', book_id=book.id) }}" enctype="multipart/form-data">
+              {% include 'library/book_form.html' %}
+            </form>
+        </div>
     {% endblock %}
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <ul class="flash-messages">
+            <div class="flash-messages">
                 {% for message in messages %}
-                    <li>{{ message }}</li>
+                    <p>{{ message }}</p>
                 {% endfor %}
-            </ul>
+            </div>
         {% endif %}
     {% endwith %}
 {% endblock %}

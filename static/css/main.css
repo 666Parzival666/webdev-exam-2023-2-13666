@@ -64,7 +64,8 @@ nav {
 }
 
 .login-button,
-.logout-button {
+.logout-button,
+.add-review-button {
   display: inline-block;
   padding: 8px 12px;
   background-color: #d5b774;
@@ -78,7 +79,9 @@ nav {
 }
 
 .login-button:hover,
-.logout-button:hover {
+.logout-button:hover,
+.add-review-button:hover,
+.upload-btn:hover {
   background-color: #CCCCCC;
 }
 
@@ -203,20 +206,24 @@ nav {
 }
 
 #deleteModal {
-  display: none; /* Скрыто по умолчанию */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Прозрачный фон */
-  z-index: 9999; /* Выше других элементов */
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
+  width: 40%;
   background-color: white;
   padding: 20px;
   border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .modal-buttons {
@@ -226,6 +233,31 @@ nav {
 
 .modal-buttons button {
   margin-left: 10px;
+  display: inline-block;
+  padding: 8px 12px;
+  color: #111c20;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s linear;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-danger {
+  background-color: #f5a6a6;
+}
+
+.btn-secondary {
+  background-color: #d5b774;
+}
+
+.btn-danger:hover {
+  background-color: #CCCCCC;
+}
+
+.btn-secondary:hover {
+  background-color: #CCCCCC;
 }
 
 .footer {
@@ -288,8 +320,269 @@ nav {
   border-radius: 4px;
   transition: background-color 0.2s linear;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .add-book-button:hover {
   background-color: #CCCCCC;
+}
+
+.book-page {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15%;
+  width: 70%;
+}
+
+.book-data {
+  display: flex;
+  flex-direction: row;
+}
+
+.book-cover {
+  width: 30%;
+  display: flex;
+}
+
+.book-cover img {
+  width: 200px;
+}
+
+.book-info {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  justify-content: space-between;
+}
+
+.book-info p {
+  border-bottom: 1px solid #213c3f;
+}
+
+.book-rating {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  font-size: 140px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.review-status {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.my-review, .another-review {
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+.desc-block p, .my-review p, .another-review p {
+  text-align: justify;
+}
+
+.form-page {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20%;
+  width: 60%;
+  padding-top: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+.form-input {
+  display: flex;
+  padding: 10px 16px;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  border-radius: 8px;
+  border: 1px solid #A2A7B2;
+  background: #FBFBFC;
+  max-width: 19%;
+}
+
+.custom-upload {
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-btn {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: #213c3f;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s linear;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.custom-upload {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Скрыть стандартную кнопку загрузки */
+input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#file-name {
+    margin-top: 10px;
+    display: none;
+}
+
+.custom-select select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #f2f2f2;
+    color: #333;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: none;
+}
+
+.custom-select select::-ms-expand {
+    display: none;
+}
+
+.custom-select::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 6px solid #A2A7B2;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    pointer-events: none;
+}
+
+.choose-genre {
+  margin-bottom: 5px;
+}
+
+.add-review-page {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20%;
+  width: 60%;
+  padding-top: 20px;
+}
+
+.rate-block {
+  margin-bottom: 15px;
+}
+
+.my-reviews-page {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15%;
+  width: 70%;
+}
+
+.my-reviews-page table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .my-reviews-page table th,
+    .my-reviews-page table td {
+        padding: 10px;
+        text-align: center;
+    }
+
+    .my-reviews-page table tr {
+        border-bottom: 5px solid white;
+    }
+
+    .my-reviews-page table th {
+        background-color: #f2f2f2;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+    }
+
+    .my-reviews-page table td {
+        border-bottom: 1px solid #000;
+    }
+
+    .my-reviews-page table td:not(:first-child) {
+        padding-left: 5px;
+    }
+
+    .review-status {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .review-rating {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .status-1 {
+        background-color: yellow;
+    }
+
+    .status-2 {
+        background-color: green;
+    }
+
+    .status-3 {
+        background-color: red;
+    }
+
+    .rating-1, .rating-2 {
+        background-color: rgba(255, 0, 0, 0.08);
+    }
+
+    .rating-3, .rating-4 {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .rating-5 {
+        background-color: rgba(59, 179, 59, 0.1);
+    }
+
+    .book-cover {
+        width: 200px;
+        height: 300px;
+        margin-right: 10px;
+    }
+
+.review-text p {
+  text-align: justify;
 }

@@ -3,7 +3,7 @@ function deleteBookModal(bookId) {
     const deleteYesBtn = document.getElementById('deleteYesBtn');
     const deleteNoBtn = document.getElementById('deleteNoBtn');
 
-    deleteModal.style.display = 'block';
+    deleteModal.style.display = 'flex';
 
     deleteNoBtn.addEventListener('click', () => {
         deleteModal.style.display = 'none';

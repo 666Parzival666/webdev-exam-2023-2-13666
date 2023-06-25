@@ -1,25 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Написать рецензию</h1>
+    <div class="add-review-page">
+        <h1>Написать рецензию</h1>
 
-    <form method="POST" action="{{ url_for('reviews.add_review', book_id=book.id) }}">
-        <div class="form-group">
-            <label for="rating">Оценка:</label>
-            <select name="rating" id="rating" class="form-control">
-                <option value="5">Отлично</option>
-                <option value="4">Хорошо</option>
-                <option value="3">Удовлетворительно</option>
-                <option value="2">Неудовлетворительно</option>
-                <option value="1">Плохо</option>
-                <option value="0">Ужасно</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="comment">Текст рецензии:</label>
-            <textarea name="comment" id="comment" class="form-control" rows="5"></textarea><br>
-            <script src="{{ url_for('static', filename='scripts/easyMDE_review.js') }}"></script>
-        </div>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
-    </form>
+        <form method="POST" action="{{ url_for('reviews.add_review', book_id=book.id) }}">
+            <div class="rate-block">
+                <label for="rating">Ваша оценка:</label>
+                <select name="rating" id="rating" class="form-control">
+                    <option value="5">Отлично</option>
+                    <option value="4">Хорошо</option>
+                    <option value="3">Удовлетворительно</option>
+                    <option value="2">Неудовлетворительно</option>
+                    <option value="1">Плохо</option>
+                    <option value="0">Ужасно</option>
+                </select>
+            </div>
+            <div class="form-easyMDE">
+                <textarea name="comment" id="comment" class="form-control" rows="5"></textarea><br>
+                <script src="{{ url_for('static', filename='scripts/easyMDE_reviews.js') }}"></script>
+            </div>
+            <button type="submit" class="add-book-button">Сохранить</button>
+        </form>
+    </div>
 {% endblock %}

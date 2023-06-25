@@ -1,21 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Мои рецензии</h1>
-  <table>
-    <tr>
-      <th>Статус</th>
-      <th>Книга</th>
-      <th>Оценка</th>
-      <th>Рецензия</th>
-    </tr>
-    {% for review in reviews %}
-      <tr>
-        <td>{{ review.status.name }}</td>
-````````<td>{{ review.book_title }}</td>
-        <td>{{ review.rating }}</td>
-        <td>{{ review.text | safe }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+    <div class="my-reviews-page">
+        <h1>Мои рецензии</h1>
+        <table>
+            <tr>
+                <th>Статус</th>
+                <th>Книга</th>
+                <th>Оценка</th>
+                <th>Рецензия</th>
+            </tr>
+            {% for review in reviews %}
+                <tr>
+                    <td>
+                        <span class="review-status status-{{ review.status.id }}" title="{% if review.status.id == 1 %}На рассмотрении{% elif review.status.id == 2 %}Опубликовано{% elif review.status.id == 3 %}Рецензия отклонена{% endif %}"></span>
+                    </td>
+                    <td class="rating-{{ review.rating }}">
+                        <b>{{ review.book_title }}</b>
+                    </td>
+                    <td class="rating-{{ review.rating }}">{{ review.rating }}</td>
+                    <td class="rating-{{ review.rating }} review-text">{{ review.text | safe }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 {% endblock %}
