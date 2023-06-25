@@ -54,22 +54,17 @@ def view_book(book_id):
         user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
         if user_review:
             user_review.text = markdown2.markdown(user_review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
-            # Если пользователь авторизован и оставил рецензию, перемещаем его рецензию в начало списка
-            if user_review in reviews:
-                reviews.remove(user_review)
-                reviews.insert(0, user_review)
         else:
             user_review = None
     else:
         user_review = None
 
     ratings = [review.rating for review in reviews]
-    if user_review and user_review.status_id == 2:
-        reviews.append(user_review)
-    average_rating = round(sum(ratings) / len(ratings), 2) if ratings else 0
+    average_rating = sum(ratings) / len(ratings) if ratings else 0
+    average_rating = round(average_rating, 2)
     reviews_count = len(reviews)
+
     book.average_rating = average_rating
-    book.reviews_count = reviews_count
 
     for review in reviews:
         user = User.query.get(review.user_id)
