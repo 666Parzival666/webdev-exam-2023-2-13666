@@ -77,15 +77,5 @@
         <script src="{{ url_for('static', filename='scripts/delete_book.js') }}"></script>
         <script src="{{ url_for('static', filename='scripts/title_cutter.js') }}"></script>
     </div>
-    <!-- Отображение flash-сообщений -->
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
 
 {% endblock %}

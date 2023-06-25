@@ -39,7 +39,18 @@
           {% endif %}
         </div>
     </nav>
-
+    <!-- Отображение flash-сообщений -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <span class="{% if message.startswith('Отрицательное') %}negative{% else %}positive{% endif %}">
+                        {{ message }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
     <!-- Контент страницы -->
     <div class="content">
         {% block content %}{% endblock %}
@@ -50,17 +61,5 @@
         <span class="user-name">Непомнящих Игорь. 2-13666. 2023</span>
     </div>
 
-    <!-- Ваши скрипты -->
-
-    <!-- Отображение flash-сообщений -->
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flash-messages">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
 </body>
 </html>

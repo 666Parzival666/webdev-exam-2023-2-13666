@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Рецензия на книгу "{{ book.title }}"</h1>
-  <p>Автор книги: {{ book.author }}</p>
-  <p>Автор рецензии: {{ user.first_name }} {{ user.last_name }}</p>
-  <p>Оценка: {{ review.rating }}</p>
-  <p>Текст рецензии: {{ review.text | safe }}</p>
-  <p>Дата добавления: {{ review.date_added.strftime('%d.%m.%Y %H:%M') }}</p>
+  <div class="review-page">
+    <h1>Рецензия на книгу "{{ book.title }}"</h1>
+    <p><b>Автор книги:</b> {{ book.author }}</p>
+    <p><b>Автор рецензии:</b> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><b>Оценка:</b> <span class="rating {% if review.rating >= 0.0 and review.rating <= 2.0 %}low-rating{% elif review.rating > 2.0 and review.rating <= 3.0 %}medium-rating{% elif review.rating > 3.0 and review.rating <= 4.0 %}high-rating{% elif review.rating > 4.0 and review.rating <= 5.0 %}super-rating{% endif %}">{{ review.rating }}</span></p>
+    <p><b>Текст рецензии:</b> {{ review.text | safe }}</p>
+    <p><b>Дата добавления:</b> {{ review.date_added.strftime('%d.%m.%Y %H:%M') }}</p>
 
-  <form action="{{ url_for('reviews.review', review_id=review.id) }}" method="post">
-    <button type="submit" name="action" value="approve" class="btn btn-primary">Одобрить</button>
-    <button type="submit" name="action" value="reject" class="btn btn-danger">Отклонить</button>
-  </form>
+    <form class="review-buttons" action="{{ url_for('reviews.review', review_id=review.id) }}" method="post">
+      <button type="submit" name="action" value="approve" class="btn btn-secondary">Одобрить</button>
+      <button type="submit" name="action" value="reject" class="btn btn-danger">Отклонить</button>
+    </form>
+  </div>
 {% endblock %}

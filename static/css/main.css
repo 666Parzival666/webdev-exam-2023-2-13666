@@ -244,6 +244,24 @@ nav {
   cursor: pointer;
 }
 
+.review-buttons {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.review-buttons button {
+  margin-left: 10px;
+  display: inline-block;
+  padding: 10px 14px;
+  color: #111c20;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s linear;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 .btn-danger {
   background-color: #f5a6a6;
 }
@@ -586,3 +604,81 @@ input[type="file"] {
 .review-text p {
   text-align: justify;
 }
+
+.moderate-page {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15%;
+  width: 70%;
+}
+
+.review-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border: 1px solid black;
+  padding: 15px;
+}
+
+.review-page {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15%;
+  width: 70%;
+}
+
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15%;
+  width: 70%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-input {
+  display: flex;
+  padding: 10px 16px;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  border-radius: 8px;
+  border: 1px solid #A2A7B2;
+  background: #FBFBFC;
+  width: 80%;
+  margin-bottom: 5px;
+}
+
+.flash-messages {
+        background-color: #f2f2f2;
+        padding: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .flash-messages span {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+
+    .flash-messages .positive {
+        background-color: #b3ffb3;
+        color: #006600;
+    }
+
+    .flash-messages .negative {
+        background-color: #ffb3b3;
+        color: #990000;
+    }
