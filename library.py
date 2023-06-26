@@ -21,60 +21,68 @@ def allowed_file(filename):
 
 @bp.route('/')
 def index():
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
 
-    books_pagination = Book.query.order_by(Book.year.desc(), Book.title) \
-        .paginate(page=page, per_page=per_page, error_out=False)
-    books = books_pagination.items
+        books_pagination = Book.query.order_by(Book.year.desc(), Book.title) \
+            .paginate(page=page, per_page=per_page, error_out=False)
+        books = books_pagination.items
 
-    genres = Genre.query.all()
+        genres = Genre.query.all()
 
-    for book in books:
-        reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
-        ratings = [review.rating for review in reviews]
-        average_rating = sum(ratings) / len(ratings) if ratings else 0
-        reviews_count = len(reviews)
-        book.average_rating = average_rating
-        book.reviews_count = reviews_count
+        for book in books:
+            reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
+            ratings = [review.rating for review in reviews]
+            average_rating = sum(ratings) / len(ratings) if ratings else 0
+            reviews_count = len(reviews)
+            book.average_rating = average_rating
+            book.reviews_count = reviews_count
 
-    user_review = None
-    if current_user.is_authenticated:
-        user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
+        user_review = None
+        if current_user.is_authenticated:
+            user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
 
-    return render_template('library/index.html', books=books, genres=genres, pagination=books_pagination, user_review=user_review)
+        return render_template('library/index.html', books=books, genres=genres, pagination=books_pagination, user_review=user_review)
+    except SQLAlchemyError:
+        flash('Произошла ошибка базы данных', 'error')
+        return redirect(url_for('library.index'))
 
 
 @bp.route('/book/<int:book_id>')
 def view_book(book_id):
-    book = Book.query.get(book_id)
-    reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
+    try:
+        book = Book.query.get(book_id)
+        reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
 
-    if current_user.is_authenticated:
-        user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
-        if user_review:
-            user_review.text = markdown2.markdown(user_review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
+        if current_user.is_authenticated:
+            user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
+            if user_review:
+                user_review.text = markdown2.markdown(user_review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
+            else:
+                user_review = None
         else:
             user_review = None
-    else:
-        user_review = None
 
-    ratings = [review.rating for review in reviews]
-    average_rating = sum(ratings) / len(ratings) if ratings else 0
-    average_rating = round(average_rating, 2)
-    reviews_count = len(reviews)
+        ratings = [review.rating for review in reviews]
+        average_rating = sum(ratings) / len(ratings) if ratings else 0
+        average_rating = round(average_rating, 2)
+        reviews_count = len(reviews)
 
-    book.average_rating = average_rating
+        book.average_rating = average_rating
 
-    for review in reviews:
-        user = User.query.get(review.user_id)
-        review.user_name = f"{user.first_name} {user.last_name}"
-        review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
+        for review in reviews:
+            user = User.query.get(review.user_id)
+            review.user_name = f"{user.first_name} {user.last_name}"
+            review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
-    book.reviews_count = reviews_count
-    book.description = markdown2.markdown(book.description, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
+        book.reviews_count = reviews_count
+        book.description = markdown2.markdown(book.description, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
-    return render_template('library/book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
+        return render_template('library/book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
+    except SQLAlchemyError:
+        flash('Произошла ошибка базы данных', 'error')
+        return redirect(url_for('library.index'))
 
 
 @bp.route('/add_book', methods=['GET', 'POST'])
