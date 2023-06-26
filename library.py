@@ -79,19 +79,15 @@ def view_book(book_id):
 
         book.reviews_count = reviews_count
         if book.description:
-            description_parts = book.description.split("\n\n")
-            rendered_description_parts = []
-
-            for part in description_parts:
-                if part.startswith("##") or part.startswith("###") or part.startswith("####"):
-                    # Если фрагмент начинается с заголовка, считаем его разметкой Markdown
-                    rendered_description_parts.append(
-                        markdown(part, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler']))
-                else:
-                    # Если фрагмент не является заголовком, считаем его обычным текстом
-                    rendered_description_parts.append(part)
-
-            book.description = "\n\n".join(rendered_description_parts)
+            try:
+                # Пытаемся преобразовать содержимое поля book.description из Markdown в HTML
+                book.description = markdown(book.description,
+                                            extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables',
+                                                    'spoiler'])
+            except Exception:
+                # Если возникает ошибка (например, если содержимое не является разметкой Markdown),
+                # то оставляем поле без изменений
+                pass
 
         return render_template('library/book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
     except SQLAlchemyError:
