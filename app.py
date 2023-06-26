@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask
 from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
-from models import db, Book, Cover, Review, User, Role, Genre
+from models import db, User
 from auth import bp as auth_bp
 from library import bp as library_bp
 from reviews import bp as reviews_bp
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager
 
 
 app = Flask(__name__)

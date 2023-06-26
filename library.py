@@ -77,7 +77,10 @@ def view_book(book_id):
             review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
 
         book.reviews_count = reviews_count
-        book.description = markdown2.markdown(book.description, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
+        if book.description:
+            book.description = markdown2.markdown(book.description,
+                                                  extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables',
+                                                          'spoiler'])
 
         return render_template('library/book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
     except SQLAlchemyError:
