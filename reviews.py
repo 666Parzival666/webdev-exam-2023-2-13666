@@ -5,6 +5,7 @@ from bleach import clean
 from flask_paginate import Pagination, get_page_args
 import markdown2
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import desc
 
 bp = Blueprint('reviews', __name__)
 
@@ -106,21 +107,26 @@ def review(review_id):
     if current_user.role_id > 2:
         flash("У вас недостаточно прав для выполнения данного действия", 'error')
         return redirect(url_for('library.index'))
-    review = Review.query.get(review_id)
-    review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
-    user = User.query.get(review.user_id)
-    book = Book.query.get(review.book_id)
 
-    if request.method == 'POST':
-        action = request.form.get('action')
-        if action == 'approve':
-            review.status_id = 2  # Устанавливаем статус "Одобрено"
-            db.session.commit()
-            flash('Рецензия одобрена', 'success')
-        elif action == 'reject':
-            review.status_id = 3  # Устанавливаем статус "Отклонено"
-            db.session.commit()
-            flash('Рецензия отклонена', 'success')
-        return redirect(url_for('reviews.moderate_reviews'))
+    try:
+        review = Review.query.get(review_id)
+        review.text = markdown2.markdown(review.text, extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables', 'spoiler'])
+        user = User.query.get(review.user_id)
+        book = Book.query.get(review.book_id)
 
-    return render_template('reviews/review.html', review=review, user=user, book=book)
+        if request.method == 'POST':
+            action = request.form.get('action')
+            if action == 'approve':
+                review.status_id = 2  # Устанавливаем статус "Одобрено"
+                db.session.commit()
+                flash('Рецензия одобрена', 'success')
+            elif action == 'reject':
+                review.status_id = 3  # Устанавливаем статус "Отклонено"
+                db.session.commit()
+                flash('Рецензия отклонена', 'success')
+            return redirect(url_for('reviews.moderate_reviews'))
+
+        return render_template('reviews/review.html', review=review, user=user, book=book)
+    except SQLAlchemyError:
+        flash('Произошла ошибка базы данных', 'error')
+        return redirect(url_for('reviews.review', review_id=review_id))
