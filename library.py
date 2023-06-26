@@ -8,6 +8,7 @@ from bleach import clean
 from config import UPLOAD_FOLDER
 from sqlalchemy.exc import SQLAlchemyError
 import markdown2
+from markdown2 import markdown
 
 bp = Blueprint('library', __name__)
 
@@ -78,9 +79,15 @@ def view_book(book_id):
 
         book.reviews_count = reviews_count
         if book.description:
-            book.description = markdown2.markdown(book.description,
-                                                  extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables',
-                                                          'spoiler'])
+            try:
+                # Пытаемся преобразовать содержимое поля book.description из Markdown в HTML
+                book.description = markdown(book.description,
+                                            extras=['fenced-code-blocks', 'cuddled-lists', 'metadata', 'tables',
+                                                    'spoiler'])
+            except Exception:
+                # Если возникает ошибка (например, если содержимое не является разметкой Markdown),
+                # то оставляем поле без изменений
+                pass
 
         return render_template('library/book.html', book=book, reviews=reviews, average_rating=average_rating, reviews_count=reviews_count, user_review=user_review)
     except SQLAlchemyError:
