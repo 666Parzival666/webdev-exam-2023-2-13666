@@ -15,10 +15,23 @@
     </div>
 
     <div class="pagination">
-      Выведены записи с {{ pagination.page * pagination.per_page - pagination.per_page + 1 }}
-      по {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page <= pagination.total else pagination.total }}
-      из {{ pagination.total }}
-      {{ pagination.links }}
-    </div>
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('reviews.moderate_reviews', page=pagination.prev_num) }}" class="pagination-link">Назад</a>
+            {% endif %}
+            {% for num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if num %}
+                    {% if num != pagination.page %}
+                        <a href="{{ url_for('reviews.moderate_reviews', page=num) }}" class="pagination-link">{{ num }}</a>
+                    {% else %}
+                        <span class="current-page">{{ num }}</span>
+                    {% endif %}
+                {% else %}
+                    <span class="ellipsis">...</span>
+                {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+                <a href="{{ url_for('reviews.moderate_reviews', page=pagination.next_num) }}" class="pagination-link">Вперед</a>
+            {% endif %}
+        </div>
   </div>
 {% endblock %}

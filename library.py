@@ -36,15 +36,16 @@ def index():
             reviews = Review.query.filter_by(book_id=book.id, status_id=2).all()
             ratings = [review.rating for review in reviews]
             average_rating = sum(ratings) / len(ratings) if ratings else 0
+            average_rating = round(average_rating, 2)
             reviews_count = len(reviews)
             book.average_rating = average_rating
             book.reviews_count = reviews_count
 
-        user_review = None
-        if current_user.is_authenticated:
-            user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
+        # user_review = None
+        # if current_user.is_authenticated:
+        #     user_review = Review.query.filter_by(book_id=book.id, user_id=current_user.id).first()
 
-        return render_template('library/index.html', books=books, genres=genres, pagination=books_pagination, user_review=user_review)
+        return render_template('library/index.html', books=books, genres=genres, pagination=books_pagination)
     except SQLAlchemyError:
         flash('Произошла ошибка базы данных', 'error')
         return redirect(url_for('library.index'))

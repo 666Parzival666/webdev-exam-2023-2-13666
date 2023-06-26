@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
-from models import db, Book, Cover, Genre, Review, User
+from models import db, Book, Review, User
 from flask_login import current_user, login_required
 from bleach import clean
 from flask_paginate import Pagination, get_page_args
@@ -76,9 +76,13 @@ def moderate_reviews():
         return redirect(url_for('library.index'))
 
     try:
-        page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page', default=1)
+        page = request.args.get('page', 1, type=int)
+        per_page = 12
 
-        reviews = Review.query.filter_by(status_id=1).order_by(desc(Review.date_added)).limit(per_page).offset(offset).all()
+        reviews_pagination = Review.query.filter_by(status_id=1).order_by(desc(Review.date_added)) \
+            .paginate(page=page, per_page=per_page, error_out=False)
+        reviews = reviews_pagination.items
+
 
         for review in reviews:
             user = User.query.get(review.user_id)
@@ -89,9 +93,7 @@ def moderate_reviews():
 
         total_reviews = Review.query.filter_by(status_id=1).count()
 
-        pagination = Pagination(page=page, per_page=per_page, total=total_reviews, css_framework='bootstrap4')
-
-        return render_template('reviews/moderate.html', reviews=reviews, pagination=pagination)
+        return render_template('reviews/moderate.html', reviews=reviews, pagination=reviews_pagination)
     except SQLAlchemyError:
         flash('Произошла ошибка базы данных', 'error')
         return redirect(url_for('reviews.moderate_reviews'))
